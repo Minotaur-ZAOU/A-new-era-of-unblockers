@@ -22,6 +22,7 @@ router.get("/search", async (req, res) => {
             params: { query: query }
         });
 
+        // 必要なデータを抽出
         const videos = response.data.map(video => ({
             title: video.title,
             thumbnail: video.thumbnail_url,
@@ -48,3 +49,4 @@ router.get("/view", async (req, res) => {
 });
 
 module.exports = router;
+
