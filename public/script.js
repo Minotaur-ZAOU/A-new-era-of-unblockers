@@ -6,8 +6,13 @@ form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const query = queryInput.value;
 
-    // ここでAPIに検索リクエストを送信
+    // APIに検索リクエストを送信
     const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
+    
+    if (!response.ok) {
+        return alert("検索中にエラーが発生しました。");
+    }
+
     const data = await response.json();
 
     // 結果を表示
