@@ -1,4 +1,4 @@
-const form = document.querySelector("form");
+const form = document.querySelector("#form");
 const queryInput = document.querySelector("#query");
 const resultsDiv = document.querySelector("#results");
 
@@ -37,6 +37,7 @@ form.addEventListener("submit", async (e) => {
             video.controls = true;
             video.playsInline = true;
             document.body.appendChild(video);
+            video.play(); // 自動再生
         });
     });
 });
