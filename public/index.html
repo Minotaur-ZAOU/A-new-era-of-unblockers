@@ -9,9 +9,13 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <form action="/api/view" target="_blank" id="form">
-        URL: <input type="url" id="url" name="url" required />
-        <button type="submit">View Video</button>
+    <div class="header">
+        <h1>New Era</h1>
+    </div>
+    <form action="/api/search" id="form">
+        <input type="text" id="query" name="query" placeholder="検索したい動画のタイトルを入力" required />
+        <button type="submit">検索</button>
     </form>
+    <div id="results"></div>
 </body>
 </html>
