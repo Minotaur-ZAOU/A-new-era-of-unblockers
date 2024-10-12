@@ -17,6 +17,9 @@
         #videoContainer {
             margin-top: 20px;
         }
+        #loading {
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body>
@@ -28,6 +31,7 @@
                 <button id="convertButton" class="btn btn-primary">変換</button>
             </div>
         </div>
+        <div id="loading" class="text-center"><p>読み込み中... </p></div>
         <div id="videoContainer" class="text-center"></div>
     </div>
 
@@ -66,12 +70,16 @@
         document.getElementById('convertButton').addEventListener('click', async () => {
             const url = document.getElementById('youtubeUrl').value.trim();
             const videoContainer = document.getElementById('videoContainer');
+            const loading = document.getElementById('loading');
 
             // URLの入力チェック
             if (!url) {
                 videoContainer.innerHTML = '<p class="text-danger">URLを入力してください。</p>';
                 return;
             }
+
+            loading.style.display = 'block'; // Show loading message
+            videoContainer.innerHTML = ''; // Clear previous content
 
             try {
                 const apiUrl = `https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`;
@@ -88,12 +96,13 @@
                 if (data.video && data.video.playerEmbedUrl) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
-                    // Piped APIからビデオ情報が得られなかった場合はInvidious APIを試す
                     await fetchFromInvidious(url);
                 }
             } catch (error) {
                 console.error('Error fetching video from Piped:', error);
                 await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
+            } finally {
+                loading.style.display = 'none'; // Hide loading message
             }
         });
 
@@ -111,11 +120,11 @@
                 if (videoData && videoData.embed) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
-                    videoContainer.innerHTML = `<p class="text-warning">動画が見つかりませんでした。</p>`;
+                    videoContainer.innerHTML = '<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>';
                 }
             } catch (error) {
                 console.error('Error fetching video from Invidious:', error);
-                videoContainer.innerHTML = `<p class="text-danger">エラーが発生しました。もう一度お試しください。</p>`;
+                videoContainer.innerHTML = '<p class="text-danger">エラーが発生しました。この動画は再生できないか、存在しない可能性があります。もう一度お試しください。</p>';
             }
         }
 
