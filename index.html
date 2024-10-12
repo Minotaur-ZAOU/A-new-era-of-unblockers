@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,50 +11,75 @@
             color: #ffffff;
             padding: 20px;
         }
-
         h1 {
             margin-bottom: 20px;
         }
-
         #videoContainer {
             margin-top: 20px;
         }
-
         #loading {
-            display: none;
+            display: none; /* Initially hidden */
         }
     </style>
-    <script type="module">
-        import { ClientType, Innertube } from 'https://cdn.jsdelivr.net/gh/LuanRT/YouTube.js/src/index.mjs';
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">YouTube Video to Piped Converter</h1>
+        <div class="input-group mb-3">
+            <input type="text" id="youtubeUrl" class="form-control" placeholder="YouTube URLを入力" />
+            <div class="input-group-append">
+                <button id="convertButton" class="btn btn-primary">変換</button>
+            </div>
+        </div>
+        <div id="loading" class="text-center"><p>読み込み中... </p></div>
+        <div id="videoContainer" class="text-center"></div>
+    </div>
 
+    <script>
         const invidiousApis = [
             "http://invidious.materialio.us/",
-            // Add other Invidious API URLs here
+            "http://invidious.perennialte.ch/",
+            "http://yewtu.be/",
+            "https://iv.datura.network/",
+            "https://invidious.private.coffee/",
+            "https://invidious.protokolla.fi/",
+            "https://yt.cdaut.de/",
+            "https://invidious.fdn.fr/",
+            "https://inv.tux.pizza/",
+            "https://invidious.privacyredirect.com/",
+            "https://invidious.drgns.space/",
+            "https://vid.puffyan.us/",
+            "https://invidious.jing.rocks/",
+            "https://youtube.076.ne.jp/",
+            "https://inv.riverside.rocks/",
+            "https://invidio.xamh.de/",
+            "https://y.com.sb/",
+            "https://invidious.sethforprivacy.com/",
+            "https://invidious.tiekoetter.com/",
+            "https://inv.bp.projectsegfau.lt/",
+            "https://inv.vern.cc/",
+            "https://invidious.nerdvpn.de/",
+            "https://inv.privacy.com.de/",
+            "https://invidious.rhyshl.live/",
+            "https://invidious.slipfox.xyz/",
+            "https://invidious.weblibre.org/",
+            "https://invidious.namazso.eu/",
+            "https://invidious.jing.rocks"
         ];
-
-        // Function to create Innertube instance
-        async function createInnertube() {
-            return await Innertube.create({
-                enable_session_cache: false,
-                fetch: (input, init) => fetch(input, init)
-            });
-        }
-
-        // The rest of your existing JavaScript code...
-
+        
         document.getElementById('convertButton').addEventListener('click', async () => {
             const url = document.getElementById('youtubeUrl').value.trim();
             const videoContainer = document.getElementById('videoContainer');
             const loading = document.getElementById('loading');
 
-            // URL validation
+            // URLの入力チェック
             if (!url) {
                 videoContainer.innerHTML = '<p class="text-danger">URLを入力してください。</p>';
                 return;
             }
 
-            loading.style.display = 'block';
-            videoContainer.innerHTML = '';
+            loading.style.display = 'block'; // Show loading message
+            videoContainer.innerHTML = ''; // Clear previous content
 
             const timeoutDuration = 10000; // 10 seconds timeout
             const timeoutPromise = new Promise((_, reject) => {
@@ -64,13 +88,18 @@
 
             try {
                 const apiUrl = `https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`;
+                
+                // Piped APIリクエストを実行
                 const response = await Promise.race([fetch(apiUrl), timeoutPromise]);
 
-                if (!response.ok) throw new Error('Pipedエラー');
+                // レスポンスチェック
+                if (!response.ok) {
+                    throw new Error('Pipedエラー');
+                }
 
                 const data = await response.json();
 
-                // Check for valid video data
+                // データが存在するか確認
                 if (data.video && data.video.playerEmbedUrl) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
@@ -83,16 +112,15 @@
                 } else {
                     videoContainer.innerHTML = '<p class="text-danger">Pipedからの動画の取得に失敗しました。Invidiousを試みます...</p>';
                 }
-                await fetchFromInvidious(url);
+                await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
             } finally {
-                loading.style.display = 'none'; 
+                loading.style.display = 'none'; // Hide loading message
             }
         });
 
-        // Fetch video from Invidious API
         async function fetchFromInvidious(url) {
             const videoContainer = document.getElementById('videoContainer');
-            const videoId = extractVideoId(url);
+            const videoId = extractVideoId(url); // YouTube URLからビデオIDを抽出
             const randomApi = invidiousApis[Math.floor(Math.random() * invidiousApis.length)];
             const apiUrl = `${randomApi}api/v1/videos/${videoId}`;
 
@@ -104,9 +132,7 @@
                 if (videoData && videoData.embed) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
-                    // If Invidious fails, utilize youtubei.js to fetch the video info.
-                    const innertube = await createInnertube();
-                    await fetchFromYoutubei(innertube, videoId);
+                    videoContainer.innerHTML = '<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>';
                 }
             } catch (error) {
                 console.error('Error fetching video from Invidious:', error);
@@ -114,44 +140,10 @@
             }
         }
 
-        // Fetch video using youtubei.js API
-        async function fetchFromYoutubei(innertube, videoId) {
-            try {
-                const videoInfo = await innertube.getInfo(videoId);
-                if (videoInfo && videoInfo.streaming_data) {
-                    const videoUrl = videoInfo.streaming_data.formats[0].url; // Take the first URL
-                    const embedUrl = `https://www.youtube.com/embed/${videoId}`; // The embed URL
-                    document.getElementById('videoContainer').innerHTML = `<iframe width="560" height="315" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
-                } else {
-                    document.getElementById('videoContainer').innerHTML = '<p class="text-danger">動画情報の取得に失敗しました。</p>';
-                }
-            } catch (error) {
-                console.error('Error fetching video using youtubei.js:', error);
-                document.getElementById('videoContainer').innerHTML = '<p class="text-danger">YouTube APIから動画情報を取得できませんでした。</p>';
-            }
-        }
-
-        // Video ID extraction
         function extractVideoId(url) {
             const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             return match ? match[1] : null;
         }
     </script>
-</head>
-
-<body>
-    <div class="container">
-        <h1 class="text-center">YouTube Video to Piped Converter</h1>
-        <div class="input-group mb-3">
-            <input type="text" id="youtubeUrl" class="form-control" placeholder="YouTube URLを入力" />
-            <div class="input-group-append">
-                <button id="convertButton" class="btn btn-primary">変換</button>
-            </div>
-        </div>
-        <div id="loading" class="text-center"><p>読み込み中...</p></div>
-        <div id="videoContainer" class="text-center"></div>
-    </div>
 </body>
-
 </html>
-
