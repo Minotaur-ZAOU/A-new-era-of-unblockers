@@ -38,7 +38,7 @@
         }
 
         #loading {
-            display: none; /* Initially hidden */
+            display: none; /* 初期は非表示 */
         }
 
         .progress {
@@ -60,7 +60,7 @@
     <div class="container">
         <div class="header text-center">
             <h1>NewEra</h1>
-            <h2>Made by proxy_minotaur</h2>
+            <h2>YouTube動画をPipedに変換</h2>
         </div>
         <div class="input-group mb-3">
             <input type="text" id="youtubeUrl" class="form-control" placeholder="YouTube URLを入力" />
@@ -108,7 +108,7 @@
             "https://invidious.namazso.eu/",
             "https://invidious.jing.rocks"
         ];
-        
+
         document.getElementById('convertButton').addEventListener('click', async () => {
             const url = document.getElementById('youtubeUrl').value.trim();
             const videoContainer = document.getElementById('videoContainer');
@@ -121,25 +121,26 @@
                 return;
             }
 
-            loading.style.display = 'block'; // Show loading message
-            videoContainer.innerHTML = ''; // Clear previous content
+            loading.style.display = 'block'; // loadingメッセージを表示
+            videoContainer.innerHTML = ''; // 前の内容をクリア
             
-            progressBar.style.width = '0%'; // Reset progress bar
+            progressBar.style.width = '0%'; // プログレスバーをリセット
             progressBar.innerText = '0%';
 
-            const timeoutDuration = 10000; // 10 seconds timeout
+            const videoId = extractVideoId(url);
+            const timeoutDuration = 10000; // 10秒のタイムアウト
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Pipedの読み込みがタイムアウトしました。')), timeoutDuration);
             });
 
             try {
-                const apiUrl = `https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`; // Piped APIを指定
+                const apiUrl = `https://pipedapi.kavin.rocks/stream/${videoId}`;
                 
                 // Piped APIリクエストを実行
                 const response = await Promise.race([
                     fetch(apiUrl).then(res => {
                         return new Promise((resolve, reject) => {
-                            // プログレス更新をシミュレーション
+                            // プログレスの更新をシミュレーション
                             let progress = 0;
                             const interval = setInterval(() => {
                                 progress += 10;
@@ -163,8 +164,9 @@
                 const data = await response.json();
 
                 // データが存在するか確認
-                if (data.video && data.video.playerEmbedUrl) {
-                    videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
+                if (data.videoStreams && data.videoStreams.length > 0) {
+                    const videoStream = data.videoStreams[0]; // 最初のストリームを取得
+                    videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoStream.url}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
                     await fetchFromInvidious(url);
                 }
@@ -177,7 +179,7 @@
                 }
                 await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
             } finally {
-                loading.style.display = 'none'; // Hide loading message
+                loading.style.display = 'none'; // loadingメッセージを非表示
             }
         });
 
@@ -229,5 +231,4 @@
     </script>
 </body>
 </html>
-
 
