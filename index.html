@@ -4,46 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Piped Video Player</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        #videoContainer {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>YouTube Video to Piped Converter</h1>
-    <input type="text" id="youtubeUrl" placeholder="YouTube URLを入力" />
-    <button id="convertButton">変換</button>
-    <div id="videoContainer"></div>
+    <div class="container">
+        <h1 class="text-center">YouTube Video to Piped Converter</h1>
+        <div class="input-group mb-3">
+            <input type="text" id="youtubeUrl" class="form-control" placeholder="YouTube URLを入力" />
+            <div class="input-group-append">
+                <button id="convertButton" class="btn btn-primary">変換</button>
+            </div>
+        </div>
+        <div id="videoContainer" class="text-center"></div>
+    </div>
 
     <script>
         document.getElementById('convertButton').addEventListener('click', async () => {
-            const url = document.getElementById('youtubeUrl').value;
+            const url = document.getElementById('youtubeUrl').value.trim();
             const videoContainer = document.getElementById('videoContainer');
 
             // URLの入力チェック
             if (!url) {
-                videoContainer.innerHTML = '<p>URLを入力してください。</p>';
+                videoContainer.innerHTML = '<p class="text-danger">URLを入力してください。</p>';
                 return;
             }
 
             try {
                 const apiUrl = `https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`;
                 const response = await fetch(apiUrl);
-                
+
                 // レスポンスチェック
                 if (!response.ok) {
                     throw new Error('ネットワークエラー');
                 }
-                
+
                 const data = await response.json();
 
                 // データが存在するか確認
                 if (data.video && data.video.playerEmbedUrl) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
-                    videoContainer.innerHTML = `<p>動画が見つかりませんでした。</p>`;
+                    videoContainer.innerHTML = `<p class="text-warning">動画が見つかりませんでした。</p>`;
                 }
             } catch (error) {
                 console.error('Error fetching video:', error);
-                videoContainer.innerHTML = `<p>エラーが発生しました。もう一度お試しください。</p>`;
+                videoContainer.innerHTML = `<p class="text-danger">エラーが発生しました。もう一度お試しください。</p>`;
             }
         });
     </script>
 </body>
 </html>
+
