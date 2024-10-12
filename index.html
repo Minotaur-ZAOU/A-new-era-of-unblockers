@@ -17,11 +17,21 @@
             const url = document.getElementById('youtubeUrl').value;
             const videoContainer = document.getElementById('videoContainer');
 
+            if (!url) {
+                videoContainer.innerHTML = '<p>URLを入力してください。</p>';
+                return;
+            }
+
             try {
                 const response = await fetch(`https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`);
+                
+                if (!response.ok) {
+                    throw new Error('ネットワークエラー');
+                }
+                
                 const data = await response.json();
 
-                if (data.video.playerEmbedUrl) {
+                if (data.video && data.video.playerEmbedUrl) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
                     videoContainer.innerHTML = `<p>動画が見つかりませんでした。</p>`;
@@ -34,3 +44,4 @@
     </script>
 </body>
 </html>
+
