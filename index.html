@@ -81,9 +81,16 @@
             loading.style.display = 'block'; // Show loading message
             videoContainer.innerHTML = ''; // Clear previous content
 
+            const timeoutDuration = 10000; // 10 seconds timeout
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Pipedの読み込みがタイムアウトしました。')), timeoutDuration);
+            });
+
             try {
                 const apiUrl = `https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`;
-                const response = await fetch(apiUrl);
+                
+                // Piped APIリクエストを実行
+                const response = await Promise.race([fetch(apiUrl), timeoutPromise]);
 
                 // レスポンスチェック
                 if (!response.ok) {
@@ -100,6 +107,11 @@
                 }
             } catch (error) {
                 console.error('Error fetching video from Piped:', error);
+                if (error.message.includes('タイムアウト')) {
+                    videoContainer.innerHTML = '<p class="text-warning">Pipedの読み込みがタイムアウトしました。Invidiousからの読み込みを開始します...</p>';
+                } else {
+                    videoContainer.innerHTML = '<p class="text-danger">Pipedからの動画の取得に失敗しました。Invidiousを試みます...</p>';
+                }
                 await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
             } finally {
                 loading.style.display = 'none'; // Hide loading message
