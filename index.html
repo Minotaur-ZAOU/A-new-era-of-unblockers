@@ -32,6 +32,37 @@
     </div>
 
     <script>
+        const invidiousApis = [
+            "http://invidious.materialio.us/",
+            "http://invidious.perennialte.ch/",
+            "http://yewtu.be/",
+            "https://iv.datura.network/",
+            "https://invidious.private.coffee/",
+            "https://invidious.protokolla.fi/",
+            "https://yt.cdaut.de/",
+            "https://invidious.fdn.fr/",
+            "https://inv.tux.pizza/",
+            "https://invidious.privacyredirect.com/",
+            "https://invidious.drgns.space/",
+            "https://vid.puffyan.us/",
+            "https://invidious.jing.rocks/",
+            "https://youtube.076.ne.jp/",
+            "https://inv.riverside.rocks/",
+            "https://invidio.xamh.de/",
+            "https://y.com.sb/",
+            "https://invidious.sethforprivacy.com/",
+            "https://invidious.tiekoetter.com/",
+            "https://inv.bp.projectsegfau.lt/",
+            "https://inv.vern.cc/",
+            "https://invidious.nerdvpn.de/",
+            "https://inv.privacy.com.de/",
+            "https://invidious.rhyshl.live/",
+            "https://invidious.slipfox.xyz/",
+            "https://invidious.weblibre.org/",
+            "https://invidious.namazso.eu/",
+            "https://invidious.jing.rocks"
+        ];
+        
         document.getElementById('convertButton').addEventListener('click', async () => {
             const url = document.getElementById('youtubeUrl').value.trim();
             const videoContainer = document.getElementById('videoContainer');
@@ -48,7 +79,7 @@
 
                 // レスポンスチェック
                 if (!response.ok) {
-                    throw new Error('ネットワークエラー');
+                    throw new Error('Pipedエラー');
                 }
 
                 const data = await response.json();
@@ -57,14 +88,41 @@
                 if (data.video && data.video.playerEmbedUrl) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
+                    // Piped APIからビデオ情報が得られなかった場合はInvidious APIを試す
+                    await fetchFromInvidious(url);
+                }
+            } catch (error) {
+                console.error('Error fetching video from Piped:', error);
+                await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
+            }
+        });
+
+        async function fetchFromInvidious(url) {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoId = extractVideoId(url); // YouTube URLからビデオIDを抽出
+            const randomApi = invidiousApis[Math.floor(Math.random() * invidiousApis.length)];
+            const apiUrl = `${randomApi}api/v1/videos/${videoId}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Invidiousエラー');
+
+                const videoData = await response.json();
+                if (videoData && videoData.embed) {
+                    videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
+                } else {
                     videoContainer.innerHTML = `<p class="text-warning">動画が見つかりませんでした。</p>`;
                 }
             } catch (error) {
-                console.error('Error fetching video:', error);
+                console.error('Error fetching video from Invidious:', error);
                 videoContainer.innerHTML = `<p class="text-danger">エラーが発生しました。もう一度お試しください。</p>`;
             }
-        });
+        }
+
+        function extractVideoId(url) {
+            const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            return match ? match[1] : null;
+        }
     </script>
 </body>
 </html>
-
