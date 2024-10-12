@@ -72,38 +72,55 @@
             const videoContainer = document.getElementById('videoContainer');
             const loading = document.getElementById('loading');
 
+            // URLの入力チェック
             if (!url) {
                 videoContainer.innerHTML = '<p class="text-danger">URLを入力してください。</p>';
                 return;
             }
 
-            loading.style.display = 'block';
-            videoContainer.innerHTML = '';
+            loading.style.display = 'block'; // Show loading message
+            videoContainer.innerHTML = ''; // Clear previous content
+
+            const timeoutDuration = 10000; // 10 seconds timeout
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Pipedの読み込みがタイムアウトしました。')), timeoutDuration);
+            });
 
             try {
                 const apiUrl = `https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`;
-                const response = await fetch(apiUrl);
+                
+                // Piped APIリクエストを実行
+                const response = await Promise.race([fetch(apiUrl), timeoutPromise]);
 
-                if (!response.ok) throw new Error('Pipedエラー');
+                // レスポンスチェック
+                if (!response.ok) {
+                    throw new Error('Pipedエラー');
+                }
 
                 const data = await response.json();
-                
+
+                // データが存在するか確認
                 if (data.video && data.video.playerEmbedUrl) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
                     await fetchFromInvidious(url);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                await fetchFromExpressServer(url);
+                console.error('Error fetching video from Piped:', error);
+                if (error.message.includes('タイムアウト')) {
+                    videoContainer.innerHTML = '<p class="text-warning">Pipedの読み込みがタイムアウトしました。Invidiousからの読み込みを開始します...</p>';
+                } else {
+                    videoContainer.innerHTML = '<p class="text-danger">Pipedからの動画の取得に失敗しました。Invidiousを試みます...</p>';
+                }
+                await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
             } finally {
-                loading.style.display = 'none';
+                loading.style.display = 'none'; // Hide loading message
             }
         });
 
         async function fetchFromInvidious(url) {
             const videoContainer = document.getElementById('videoContainer');
-            const videoId = extractVideoId(url);
+            const videoId = extractVideoId(url); // YouTube URLからビデオIDを抽出
             const randomApi = invidiousApis[Math.floor(Math.random() * invidiousApis.length)];
             const apiUrl = `${randomApi}api/v1/videos/${videoId}`;
 
@@ -115,24 +132,10 @@
                 if (videoData && videoData.embed) {
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
-                    videoContainer.innerHTML = '<p class="text-warning">動画が見つかりませんでした。再度お試しください。</p>';
+                    videoContainer.innerHTML = '<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>';
                 }
             } catch (error) {
                 console.error('Error fetching video from Invidious:', error);
-                await fetchFromExpressServer(url); // Invidiousで失敗したらExpressにフォールバック
-            }
-        }
-
-        async function fetchFromExpressServer(url) {
-            const videoContainer = document.getElementById('videoContainer');
-            const expressServerUrl = `http://localhost:8080/view?url=${encodeURIComponent(url)}`;
-
-            try {
-                const response = await fetch(expressServerUrl);
-                if (!response.ok) throw new Error('Expressサーバエラー');
-                window.location.href = expressServerUrl; // ExpressサーバーのURLにリダイレクト
-            } catch (error) {
-                console.error('Error fetching video from Express:', error);
                 videoContainer.innerHTML = '<p class="text-danger">エラーが発生しました。この動画は再生できないか、存在しない可能性があります。もう一度お試しください。</p>';
             }
         }
