@@ -133,10 +133,24 @@
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
                     videoContainer.innerHTML = '<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>';
+                    await fallbackToYouTube(url); // Invidiousで失敗した場合、YouTubeにフォールバック
                 }
             } catch (error) {
                 console.error('Error fetching video from Invidious:', error);
                 videoContainer.innerHTML = '<p class="text-danger">エラーが発生しました。この動画は再生できないか、存在しない可能性があります。もう一度お試しください。</p>';
+                await fallbackToYouTube(url); // ここでもYouTubeにフォールバック
+            }
+        }
+
+        async function fallbackToYouTube(url) {
+            const videoId = extractVideoId(url);
+            if (videoId) {
+                const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}`;
+                const videoContainer = document.getElementById('videoContainer');
+                videoContainer.innerHTML = `<iframe width="560" height="315" src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
+            } else {
+                const videoContainer = document.getElementById('videoContainer');
+                videoContainer.innerHTML = '<p class="text-danger">YouTube動画IDを取得できませんでした。URLが正しいか確認してください。</p>';
             }
         }
 
@@ -147,3 +161,4 @@
     </script>
 </body>
 </html>
+
