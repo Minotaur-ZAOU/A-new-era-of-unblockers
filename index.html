@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewEra</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <style>
         body {
             background-color: #343a40;
@@ -84,7 +87,7 @@
             </div>
         </div>
         <div class="input-group mb-3">
-            <input type="text" id="searchQuery" class="form-control" placeholder="動画を検索" />
+            <input type="search" id="searchbox" class="form-control" placeholder="動画を検索" title="検索" />
             <div class="input-group-append">
                 <button id="searchButton" class="btn btn-primary">検索</button>
             </div>
@@ -234,7 +237,7 @@
         });
 
         document.getElementById('searchButton').addEventListener('click', async () => {
-            const query = document.getElementById('searchQuery').value.trim();
+            const query = document.getElementById('searchbox').value.trim();
             const searchResults = document.getElementById('searchResults');
             searchResults.innerHTML = ''; // 前の検索結果をクリア
 
@@ -368,7 +371,24 @@
                 new Promise((_, reject) => setTimeout(() => reject(new Error('タイムアウト')), duration))
             ]);
         }
+
+        // オートコンプリート機能の追加
+        $('#searchbox').autocomplete({
+            source: function (request, response) {
+                const url = `/suggest?keyword=${request.term}`;
+                $.ajax({
+                    url: url,
+                    method: "GET",
+                    success: function(data) {
+                        response(data);
+                    },
+                    error: function() {
+                        response([]);
+                    }
+                });
+            },
+            delay: 300
+        });
     </script>
 </body>
 </html>
-
