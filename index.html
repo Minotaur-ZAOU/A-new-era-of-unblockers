@@ -54,6 +54,21 @@
         .btn-primary:hover {
             background-color: #0056b3;
         }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .search-result {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #495057;
+            border-radius: 5px;
+        }
+
+        .search-result a {
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +83,12 @@
                 <button id="convertButton" class="btn btn-primary">変換</button>
             </div>
         </div>
+        <div class="input-group mb-3">
+            <input type="text" id="searchQuery" class="form-control" placeholder="動画を検索" />
+            <div class="input-group-append">
+                <button id="searchButton" class="btn btn-primary">検索</button>
+            </div>
+        </div>
         <div id="loading" class="text-center">
             <p>読み込み中...</p>
             <div class="progress">
@@ -75,10 +96,12 @@
             </div>
         </div>
         <div id="videoContainer" class="text-center"></div>
+        <div class="search-results" id="searchResults"></div>
     </div>
 
     <script>
         const invidiousApis = [
+            // URLを実際に稼働しているAPIに変更してください
             "http://invidious.materialio.us/",
             "http://invidious.perennialte.ch/",
             "http://yewtu.be/",
@@ -180,6 +203,39 @@
                 await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
             } finally {
                 loading.style.display = 'none'; // loadingメッセージを非表示
+            }
+        });
+
+        document.getElementById('searchButton').addEventListener('click', async () => {
+            const query = document.getElementById('searchQuery').value.trim();
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = ''; // 前の検索結果をクリア
+
+            if (!query) {
+                await showMessage('<p class="text-danger">検索クエリを入力してください。</p>', searchResults);
+                return;
+            }
+
+            const apiUrl = `https://pipedapi.kavin.rocks/search?query=${encodeURIComponent(query)}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('検索中にエラーが発生しました。');
+
+                const results = await response.json();
+                results.forEach(video => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('search-result');
+                    resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>`;
+                    searchResults.appendChild(resultDiv);
+                });
+
+                if (results.length === 0) {
+                    await showMessage('<p class="text-warning">動画が見つかりませんでした。</p>', searchResults);
+                }
+            } catch (error) {
+                console.error('Error searching videos:', error);
+                await showMessage('<p class="text-danger">動画の検索中にエラーが発生しました。</p>', searchResults);
             }
         });
 
