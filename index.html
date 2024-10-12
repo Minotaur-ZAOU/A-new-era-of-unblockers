@@ -77,18 +77,20 @@
         /* Loading screen styles */
         #hackEffect {
             position: fixed;
-            top: 0;
+            bottom: 0; /* 下部に固定 */
             left: 0;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
             color: #00ff00;
             display: none;
             font-family: 'Courier New', monospace;
             font-size: 1.2rem;
             white-space: pre;
             z-index: 9999;
-            overflow: hidden;
+            overflow-y: auto; /* 縦方向のオーバーフローを許可 */
+            max-height: 50%; /* 高さの制限 */
+            background: rgba(0, 0, 0, 0.8); /* 半透明の背景 */
+            padding: 10px; /* パディングを追加 */
+            box-sizing: border-box; /* ボックスサイズをボックスモデルに準拠 */
         }
     </style>
 </head>
@@ -125,88 +127,89 @@
     <script>
         const invidiousApis = [
             "http://invidious.materialio.us/",
-        "http://invidious.perennialte.ch/",
-        "http://yewtu.be/",
-        "https://iv.datura.network/",
-        "https://invidious.private.coffee/",
-        "https://invidious.protokolla.fi/",
-        "https://yt.cdaut.de/",
-        "https://invidious.fdn.fr/",
-        "https://inv.tux.pizza/",
-        "https://invidious.privacyredirect.com/",
-        "https://invidious.drgns.space/",
-        "https://vid.puffyan.us/",
-        "https://invidious.jing.rocks/",
-        "https://youtube.076.ne.jp/",
-        "https://inv.riverside.rocks/",
-        "https://invidio.xamh.de/",
-        "https://y.com.sb/",
-        "https://invidious.sethforprivacy.com/",
-        "https://invidious.tiekoetter.com/",
-        "https://inv.bp.projectsegfau.lt/",
-        "https://inv.vern.cc/",
-        "https://invidious.nerdvpn.de/",
-        "https://inv.privacy.com.de/",
-        "https://invidious.rhyshl.live/",
-        "https://invidious.slipfox.xyz/",
-        "https://invidious.weblibre.org/",
-        "https://invidious.namazso.eu/",
-        "https://invidious.jing.rocks",
-        "https://inv.nadeko.net/",
-        "https://pipedapi.kavin.rocks",
-        "https://pipedapi.tokhmi.xyz",
-        "https://pipedapi.moomoo.me",
-        "https://pipedapi.syncpundit.io",
-        "https://api-piped.mha.fi",
-        "https://piped-api.garudalinux.org",
-        "https://pipedapi.rivo.lol",
-        "https://pipedapi.leptons.xyz",
-        "https://piped-api.lunar.icu",
-        "https://ytapi.dc09.ru",
-        "https://pipedapi.colinslegacy.com",
-        "https://yapi.vyper.me",
-        "https://api.looleh.xyz",
-        "https://piped-api.cfe.re",
-        "https://pipedapi.r4fo.com",
-        "https://pipedapi.nosebs.ru",
-        "https://pipedapi-libre.kavin.rocks",
-        "https://pa.mint.lgbt",
-        "https://pa.il.ax",
-        "https://piped-api.privacy.com.de",
-        "https://api.piped.projectsegfau.lt",
-        "https://pipedapi.in.projectsegfau.lt",
-        "https://pipedapi.us.projectsegfau.lt",
-        "https://watchapi.whatever.social",
-        "https://api.piped.privacydev.net",
-        "https://pipedapi.palveluntarjoaja.eu",
-        "https://pipedapi.smnz.de",
-        "https://pipedapi.adminforge.de",
-        "https://pipedapi.qdi.fi",
-        "https://piped-api.hostux.net",
-        "https://pdapi.vern.cc",
-        "https://pipedapi.pfcd.me",
-        "https://pipedapi.frontendfriendly.xyz",
-        "https://api.piped.yt",
-        "https://pipedapi.astartes.nl",
-        "https://pipedapi.osphost.fi",
-        "https://pipedapi.simpleprivacy.fr",
-        "https://pipedapi.drgns.space",
-        "https://pipedapi.ggtyler.dev",
-        "https://api.watch.pluto.lat",
-        "https://piped-backend.seitan-ayoub.lol",
-        "https://pipedapi.owo.si",
-        "https://api.piped.minionflo.net",
-        "https://pipedapi.nezumi.party",
-        "https://pipedapi.ducks.party",
-        "https://pipedapi.ngn.tf",
-        "https://pipedapi.coldforge.xyz",
-        "https://piped-api.codespace.cz",
-        "https://pipedapi.reallyaweso.me",
-        "https://pipedapi.phoenixthrush.com",
-        "https://api.piped.private.coffee",
+           "http://invidious.perennialte.ch/",
+    "http://yewtu.be/",
+    "https://iv.datura.network/",
+    "https://invidious.private.coffee/",
+    "https://invidious.protokolla.fi/",
+    "https://yt.cdaut.de/",
+    "https://invidious.fdn.fr/",
+    "https://inv.tux.pizza/",
+    "https://invidious.privacyredirect.com/",
+    "https://invidious.drgns.space/",
+    "https://vid.puffyan.us/",
+    "https://invidious.jing.rocks/",
+    "https://youtube.076.ne.jp/",
+    "https://inv.riverside.rocks/",
+    "https://invidio.xamh.de/",
+    "https://y.com.sb/",
+    "https://invidious.sethforprivacy.com/",
+    "https://invidious.tiekoetter.com/",
+    "https://inv.bp.projectsegfau.lt/",
+    "https://inv.vern.cc/",
+    "https://invidious.nerdvpn.de/",
+    "https://inv.privacy.com.de/",
+    "https://invidious.rhyshl.live/",
+    "https://invidious.slipfox.xyz/",
+    "https://invidious.weblibre.org/",
+    "https://invidious.namazso.eu/",
+    "https://invidious.jing.rocks",
+    "https://inv.nadeko.net/",
+    "https://pipedapi.kavin.rocks",
+    "https://pipedapi.tokhmi.xyz",
+    "https://pipedapi.moomoo.me",
+    "https://pipedapi.syncpundit.io",
+    "https://api-piped.mha.fi",
+    "https://piped-api.garudalinux.org",
+    "https://pipedapi.rivo.lol",
+    "https://pipedapi.leptons.xyz",
+    "https://piped-api.lunar.icu",
+    "https://ytapi.dc09.ru",
+    "https://pipedapi.colinslegacy.com",
+    "https://yapi.vyper.me",
+    "https://api.looleh.xyz",
+    "https://piped-api.cfe.re",
+    "https://pipedapi.r4fo.com",
+    "https://pipedapi.nosebs.ru",
+    "https://pipedapi-libre.kavin.rocks",
+    "https://pa.mint.lgbt",
+    "https://pa.il.ax",
+    "https://piped-api.privacy.com.de",
+    "https://api.piped.projectsegfau.lt",
+    "https://pipedapi.in.projectsegfau.lt",
+    "https://pipedapi.us.projectsegfau.lt",
+    "https://watchapi.whatever.social",
+    "https://api.piped.privacydev.net",
+    "https://pipedapi.palveluntarjoaja.eu",
+    "https://pipedapi.smnz.de",
+    "https://pipedapi.adminforge.de",
+    "https://pipedapi.qdi.fi",
+    "https://piped-api.hostux.net",
+    "https://pdapi.vern.cc",
+    "https://pipedapi.pfcd.me",
+    "https://pipedapi.frontendfriendly.xyz",
+    "https://api.piped.yt",
+    "https://pipedapi.astartes.nl",
+    "https://pipedapi.osphost.fi",
+    "https://pipedapi.simpleprivacy.fr",
+    "https://pipedapi.drgns.space",
+    "https://pipedapi.ggtyler.dev",
+    "https://api.watch.pluto.lat",
+    "https://piped-backend.seitan-ayoub.lol",
+    "https://pipedapi.owo.si",
+    "https://api.piped.minionflo.net",
+    "https://pipedapi.nezumi.party",
+    "https://pipedapi.ducks.party",
+    "https://pipedapi.ngn.tf",
+    "https://pipedapi.coldforge.xyz",
+    "https://piped-api.codespace.cz",
+    "https://pipedapi.reallyaweso.me",
+    "https://pipedapi.phoenixthrush.com",
+    "https://api.piped.private.coffee",  
             "https://schaunapi.ehwurscht.at"
         ];
 
+        // 変換ボタンのクリックイベント
         document.getElementById('convertButton').addEventListener('click', async () => {
             const url = document.getElementById('youtubeUrl').value.trim();
             const videoContainer = document.getElementById('videoContainer');
@@ -220,38 +223,33 @@
                 return;
             }
 
-            loading.style.display = 'block'; // loadingメッセージを表示
-            videoContainer.innerHTML = ''; // 前の内容をクリア
-            hackEffect.style.display = 'block'; // ハッカー効果を表示
-            progressBar.style.width = '0%'; // プログレスバーをリセット
+            loading.style.display = 'block';
+            videoContainer.innerHTML = '';
+            hackEffect.style.display = 'block'; 
+            progressBar.style.width = '0%'; 
             progressBar.innerText = '0%';
 
-            // ハッカーエフェクトの文字列を生成
             for (let i = 0; i < 30; i++) {
                 setTimeout(() => {
                     hackEffect.innerText += `Processing request for ${url}... ${new Date().toLocaleTimeString()}\n`;
-                }, i * 200); // 200ミリ秒ごとに追加
+                }, i * 200);
             }
 
             const videoId = extractVideoId(url);
-            const timeoutDuration = 10000; // 10秒のタイムアウト
+            const timeoutDuration = 10000;
 
             try {
                 const apiUrl = `https://pipedapi.kavin.rocks/stream/${videoId}`;
-                
-                // Piped APIリクエストを実行
                 const response = await fetchWithTimeout(apiUrl, timeoutDuration, progressBar);
 
-                // レスポンスチェック
                 if (!response.ok) {
                     throw new Error('Pipedエラー');
                 }
 
                 const data = await response.json();
 
-                // データが存在するか確認
                 if (data.videoStreams && data.videoStreams.length > 0) {
-                    const videoStream = data.videoStreams[0]; // 最初のストリームを取得
+                    const videoStream = data.videoStreams[0];
                     videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoStream.url}" frameborder="0" allowfullscreen></iframe>`;
                 } else {
                     await fetchFromInvidious(url);
@@ -260,9 +258,9 @@
                 console.error('Error fetching video from Piped:', error);
                 await handleApiError(error, url, videoContainer);
             } finally {
-                loading.style.display = 'none'; // loadingメッセージを非表示
-                hackEffect.style.display = 'none'; // ローディングエフェクトを非表示
-                hackEffect.innerText = ''; // テキストをクリア
+                loading.style.display = 'none';
+                hackEffect.style.display = 'none'; 
+                hackEffect.innerText = ''; 
             }
         });
 
@@ -270,7 +268,7 @@
         document.getElementById('searchButton').addEventListener('click', async () => {
             const query = document.getElementById('searchbox').value.trim();
             const searchResults = document.getElementById('searchResults');
-            searchResults.innerHTML = ''; // 前の検索結果をクリア
+            searchResults.innerHTML = '';
 
             if (!query) {
                 await showMessage('<p class="text-danger">検索クエリを入力してください。</p>', searchResults);
@@ -297,7 +295,7 @@
             } catch (error) {
                 console.error('Error searching videos:', error);
                 await showMessage('<p class="text-danger">動画の検索中にエラーが発生しました。別のAPIを試しています...</p>', searchResults);
-                await fallbackToSearchWithAlternativeAPIs(query, searchResults); // 代替APIで検索
+                await fallbackToSearchWithAlternativeAPIs(query, searchResults);
             }
         });
 
@@ -353,7 +351,7 @@
                     });
 
                     if (results.length > 0) {
-                        return; // 成功した場合は終了
+                        return; 
                     }
                 } catch (error) {
                     console.error('Error searching videos with alternative API:', error);
@@ -380,7 +378,7 @@
             } else {
                 await showMessage('<p class="text-danger">Pipedからの動画の取得に失敗しました。Invidiousを試みます...</p>', videoContainer);
             }
-            await fetchFromInvidious(url); // Piped APIで失敗したらInvidiousを試す
+            await fetchFromInvidious(url);
         }
 
         async function fetchWithTimeout(url, duration, progressBar) {
@@ -423,3 +421,4 @@
     </script>
 </body>
 </html>
+
