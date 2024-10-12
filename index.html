@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piped Video Player</title>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>YouTube Video to Piped Converter</h1>
+    <input type="text" id="youtubeUrl" placeholder="YouTube URLを入力" />
+    <button id="convertButton">変換</button>
+    <div id="videoContainer"></div>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', async () => {
+            const url = document.getElementById('youtubeUrl').value;
+            const videoContainer = document.getElementById('videoContainer');
+
+            try {
+                const response = await fetch(`https://pipedapi.kavin.rocks/video?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (data.video.playerEmbedUrl) {
+                    videoContainer.innerHTML = `<iframe width="560" height="315" src="${data.video.playerEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
+                } else {
+                    videoContainer.innerHTML = `<p>動画が見つかりませんでした。</p>`;
+                }
+            } catch (error) {
+                console.error('Error fetching video:', error);
+                videoContainer.innerHTML = `<p>エラーが発生しました。もう一度お試しください。</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
