@@ -82,12 +82,13 @@
         </div>
     </div>
     <div id="loading" class="text-center">
-        <p>読み込み中...</p>
+        <p id="loadingMessage">読み込み中...</p>
         <div class="progress">
             <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"
                  aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
             </div>
         </div>
+        <p id="estimatedTime" class="mt-2"></p>
     </div>
     <div id="videoContainer" class="text-center"></div>
     <div class="search-results" id="searchResults"></div>
@@ -95,15 +96,16 @@
 
 <script>
     const pipedApi = "https://pipedapi.kavin.rocks";
-    const invidiousApi = "https://yewtu.be"; // 例としてyewtu.beを使用
+    const invidiousApi = "https://yewtu.be"; 
 
     document.getElementById('convertButton').addEventListener('click', async () => {
         const url = document.getElementById('youtubeUrl').value.trim();
         const videoContainer = document.getElementById('videoContainer');
         const loading = document.getElementById('loading');
         const progressBar = document.getElementById('progressBar');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const estimatedTime = document.getElementById('estimatedTime');
 
-        // URLの入力チェック
         if (!url) {
             await showMessage('<p class="text-danger">URLを入力してください。</p>', videoContainer);
             return;
@@ -115,12 +117,21 @@
         progressBar.innerText = '0%';
 
         const videoId = extractVideoId(url);
-
         if (!videoId) {
             await showMessage('<p class="text-danger">動画IDを取得できませんでした。URLを確認してください。</p>', videoContainer);
             loading.style.display = 'none';
             return;
         }
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10; // Shafts progress by 10% every second for demonstration
+            progressBar.style.width = `${Math.min(progress, 100)}%`;
+            progressBar.innerText = `${Math.min(progress, 100)}%`;
+            loadingMessage.textContent = '動画を取得中...';
+            estimatedTime.textContent = `残り時間: 約${(10 - (progress / 10)).toFixed(0)}秒`; // 予想時間を設定
+            if (progress >= 100) clearInterval(interval);
+        }, 1000);
 
         try {
             await fetchFromPiped(videoId, videoContainer);
@@ -128,17 +139,16 @@
             console.error('Pipedからの取得エラー:', error);
             await fetchFromInvidious(videoId, videoContainer);
         } finally {
+            clearInterval(interval);
             loading.style.display = 'none';
+            estimatedTime.textContent = '';
         }
     });
 
     async function fetchFromPiped(videoId, videoContainer) {
         const apiUrl = `${pipedApi}/api/v1/videos/${videoId}`;
         const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-            throw new Error('Pipedからの動画取得が失敗しました。');
-        }
+        if (!response.ok) throw new Error('Pipedからの動画取得が失敗しました。');
 
         const data = await response.json();
         if (data.videoStreams && data.videoStreams.length > 0) {
@@ -152,10 +162,7 @@
     async function fetchFromInvidious(videoId, videoContainer) {
         const apiUrl = `${invidiousApi}/api/v1/videos/${videoId}`;
         const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-            throw new Error('Invidiousからの動画取得が失敗しました。');
-        }
+        if (!response.ok) throw new Error('Invidiousからの動画取得が失敗しました。');
 
         const videoData = await response.json();
         if (videoData && videoData.embed) {
@@ -206,14 +213,13 @@
         return new Promise(resolve => setTimeout(resolve, 3000));
     }
 
-    // オートコンプリート機能の追加
     $('#searchbox').autocomplete({
         source: async function (request, response) {
             const url = `${pipedApi}/search?query=${request.term}`;
             try {
                 const res = await fetch(url);
                 const data = await res.json();
-                response(data); 
+                response(data);
             } catch {
                 response([]);
             }
@@ -223,3 +229,4 @@
 </script>
 </body>
 </html>
+
