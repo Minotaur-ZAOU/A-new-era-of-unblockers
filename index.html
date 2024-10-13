@@ -7,101 +7,94 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <style>
-        body {
-            background-color: #343a40;
-            color: #ffffff;
-            padding: 20px;
-        }
-        #videoContainer {
-            margin-top: 20px;
-        }
-        .search-result {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #495057;
-            border-radius: 5px;
-        }
-        .search-result a {
-            color: #ffffff;
-        }
+        body { background-color: #343a40; color: #ffffff; padding: 20px; }
+        #videoContainer { margin-top: 20px; }
+        .search-result { margin-bottom: 10px; padding: 10px; background-color: #495057; border-radius: 5px; }
+        .search-result a { color: #ffffff; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>NewEra</h1>
-    <h2>YouTube動画をPipedに変換</h2>
-    <input type="text" id="youtubeUrl" class="form-control" placeholder="YouTube URLを入力"/>
-    <button id="convertButton" class="btn btn-primary">変換</button>
-    <input type="search" id="searchbox" class="form-control" placeholder="動画を検索" title="検索"/>
-    <button id="searchButton" class="btn btn-primary">検索</button>
-    <div id="videoContainer" class="text-center"></div>
-    <div id="searchResults"></div>
-</div>
-
-<script>
-    document.getElementById('convertButton').addEventListener('click', async () => {
-        const url = document.getElementById('youtubeUrl').value.trim();
-        const videoContainer = document.getElementById('videoContainer');
-        videoContainer.innerHTML = '';  // 前の内容をクリア
-
-        if (!url) {
-            alert('URLを入力してください。');
-            return;
-        }
-
-        const videoId = extractVideoId(url);
-        if (!videoId) {
-            alert('動画IDを取得できませんでした。');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/videos/${videoId}`);
-            const data = await response.json();
-            if (data.error) {
-                throw new Error(data.error);
+    <div class="container">
+        <h1>NewEra</h1>
+        <h2>YouTube動画をPipedに変換</h2>
+        <input type="text" id="youtubeUrl" class="form-control" placeholder="YouTube URLを入力"/>
+        <button id="convertButton" class="btn btn-primary">変換</button>
+        <input type="search" id="searchbox" class="form-control" placeholder="動画を検索" title="検索"/>
+        <button id="searchButton" class="btn btn-primary">検索</button>
+        <div id="videoContainer" class="text-center"></div>
+        <div id="searchResults"></div>
+    </div>
+    <script>
+        const apis = [
+            "http://invidious.materialio.us/",
+            "http://invidious.perennialte.ch/",
+            "http://yewtu.be/"
+        ];
+        
+        async function fetchInvidiousAPI(url) {
+            for (const api of apis) {
+                try {
+                    const response = await fetch(api + url);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (e) {
+                    console.error(`APIエラー: ${api}`, e);
+                }
             }
-            const videoEmbed = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${data[0].id}" frameborder="0" allowfullscreen></iframe>`;
-            videoContainer.innerHTML = videoEmbed;
-        } catch (error) {
-            console.error(error);
-            alert('エラーが発生しました。');
-        }
-    });
-
-    document.getElementById('searchButton').addEventListener('click', async () => {
-        const query = document.getElementById('searchbox').value.trim();
-        const searchResults = document.getElementById('searchResults');
-        searchResults.innerHTML = '';  // 前の検索結果をクリア
-
-        if (!query) {
-            alert('検索クエリを入力してください。');
-            return;
+            throw new Error('すべてのInvidious APIが利用できません。');
         }
 
-        try {
-            const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-            const results = await response.json();
-            if (results.error) {
-                throw new Error(results.error);
+        document.getElementById('convertButton').addEventListener('click', async () => {
+            const url = document.getElementById('youtubeUrl').value.trim();
+            const videoContainer = document.getElementById('videoContainer');
+            videoContainer.innerHTML = '';
+            if (!url) {
+                alert('URLを入力してください。');
+                return;
             }
-            results.forEach(video => {
-                const resultDiv = document.createElement('div');
-                resultDiv.classList.add('search-result');
-                resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.id}" target="_blank">${video.title}</a>`;
-                searchResults.appendChild(resultDiv);
-            });
-        } catch (error) {
-            console.error(error);
-            alert('検索中にエラーが発生しました。');
-        }
-    });
+            const videoId = extractVideoId(url);
+            if (!videoId) {
+                alert('動画IDを取得できませんでした。');
+                return;
+            }
+            try {
+                const data = await fetchInvidiousAPI(`api/v1/videos/${encodeURIComponent(videoId)}`);
+                const videoEmbed = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${data.videoId}" frameborder="0" allowfullscreen></iframe>`;
+                videoContainer.innerHTML = videoEmbed;
+            } catch (error) {
+                console.error(error);
+                alert('エラーが発生しました。');
+            }
+        });
 
-    function extractVideoId(url) {
-        const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        return match ? match[1] : null;
-    }
-</script>
+        document.getElementById('searchButton').addEventListener('click', async () => {
+            const query = document.getElementById('searchbox').value.trim();
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            if (!query) {
+                alert('検索クエリを入力してください。');
+                return;
+            }
+            try {
+                const results = await fetchInvidiousAPI(`api/v1/search?q=${encodeURIComponent(query)}&hl=jp`);
+                results.forEach(video => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add('search-result');
+                    resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>`;
+                    searchResults.appendChild(resultDiv);
+                });
+            } catch (error) {
+                console.error(error);
+                alert('検索中にエラーが発生しました。');
+            }
+        });
+
+        function extractVideoId(url) {
+            const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:v\/|e(?:mbed)?\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            return match ? match[1] : null;
+        }
+    </script>
 </body>
 </html>
 
