@@ -9,58 +9,18 @@
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <style>
-        body {
-            background-color: #343a40;
-            color: #ffffff;
-            padding: 20px;
-        }
-        .header {
-            background-color: #6c757d;
-            padding: 20px;
-            border-radius: 5px;
-        }
-        h1 {
-            margin-bottom: 0;
-            font-family: 'Arial', sans-serif;
-            text-transform: uppercase;
-        }
-        h2 {
-            font-weight: normal;
-            font-size: 1.2rem;
-        }
-        #videoContainer {
-            margin-top: 20px;
-            border: 1px solid #6c757d;
-            border-radius: 5px;
-            padding: 10px;
-            background-color: #495057;
-        }
-        #loading {
-            display: none;
-        }
-        .progress {
-            height: 20px;
-            margin-top: 10px;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .search-results {
-            margin-top: 20px;
-        }
-        .search-result {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #495057;
-            border-radius: 5px;
-        }
-        .search-result a {
-            color: #ffffff;
-        }
+        body { background-color: #343a40; color: #ffffff; padding: 20px; }
+        .header { background-color: #6c757d; padding: 20px; border-radius: 5px; }
+        h1 { margin-bottom: 0; font-family: 'Arial', sans-serif; text-transform: uppercase; }
+        h2 { font-weight: normal; font-size: 1.2rem; }
+        #videoContainer { margin-top: 20px; border: 1px solid #6c757d; border-radius: 5px; padding: 10px; background-color: #495057; }
+        #loading { display: none; }
+        .progress { height: 20px; margin-top: 10px; }
+        .btn-primary { background-color: #007bff; border: none; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .search-results { margin-top: 20px; }
+        .search-result { margin-bottom: 10px; padding: 10px; background-color: #495057; border-radius: 5px; }
+        .search-result a { color:#ffffff; }
     </style>
 </head>
 <body>
@@ -81,63 +41,159 @@
             <button id="searchButton" class="btn btn-primary">検索</button>
         </div>
     </div>
+
+    <div class="form-group">
+        <label for="modeSwitch">マナーモード</label>
+        <select id="modeSwitch" class="form-control">
+            <option value="off">オフ</option>
+            <option value="on">オン</option>
+        </select>
+    </div>
+
     <div id="loading" class="text-center">
         <p id="loadingMessage">読み込み中...</p>
         <div class="progress">
-            <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"
-                 aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
-            </div>
+            <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
         </div>
         <p id="estimatedTime" class="mt-2"></p>
     </div>
+
     <div id="videoContainer" class="text-center"></div>
     <div class="search-results" id="searchResults"></div>
 </div>
 
 <script>
-    const pipedApi = "https://pipedapi.kavin.rocks";
-    const invidiousApi = "https://yewtu.be"; 
+    const pipedApis = [
+        "https://pipedapi.kavin.rocks",
+         "https://pipedapi.tokhmi.xyz",
+    "https://pipedapi.moomoo.me",
+    "https://pipedapi.syncpundit.io",
+    "https://api-piped.mha.fi",
+    "https://piped-api.garudalinux.org",
+    "https://pipedapi.rivo.lol",
+    "https://pipedapi.leptons.xyz",
+    "https://piped-api.lunar.icu",
+    "https://ytapi.dc09.ru",
+    "https://pipedapi.colinslegacy.com",
+    "https://yapi.vyper.me",
+    "https://api.looleh.xyz",
+    "https://piped-api.cfe.re",
+    "https://pipedapi.r4fo.com",
+    "https://pipedapi.nosebs.ru",
+    "https://pipedapi-libre.kavin.rocks",
+    "https://pa.mint.lgbt",
+    "https://pa.il.ax",
+    "https://piped-api.privacy.com.de",
+    "https://api.piped.projectsegfau.lt",
+    "https://pipedapi.in.projectsegfau.lt",
+    "https://pipedapi.us.projectsegfau.lt",
+    "https://watchapi.whatever.social",
+    "https://api.piped.privacydev.net",
+    "https://pipedapi.palveluntarjoaja.eu",
+    "https://pipedapi.smnz.de",
+    "https://pipedapi.adminforge.de",
+    "https://pipedapi.qdi.fi",
+    "https://piped-api.hostux.net",
+    "https://pdapi.vern.cc",
+    "https://pipedapi.pfcd.me",
+    "https://pipedapi.frontendfriendly.xyz",
+    "https://api.piped.yt",
+    "https://pipedapi.astartes.nl",
+    "https://pipedapi.osphost.fi",
+    "https://pipedapi.simpleprivacy.fr",
+    "https://pipedapi.drgns.space",
+    "https://pipedapi.ggtyler.dev",
+    "https://api.watch.pluto.lat",
+    "https://piped-backend.seitan-ayoub.lol",
+    "https://pipedapi.owo.si",
+    "https://api.piped.minionflo.net",
+    "https://pipedapi.nezumi.party",
+    "https://pipedapi.ducks.party",
+    "https://pipedapi.ngn.tf",
+    "https://pipedapi.coldforge.xyz",
+    "https://piped-api.codespace.cz",
+    "https://pipedapi.reallyaweso.me",
+    "https://pipedapi.phoenixthrush.com",
+    "https://api.piped.private.coffee",
+    "https://schaunapi.ehwurscht.at"
+    ];
+
+    const invidiousApis = [
+        "http://invidious.materialio.us/",
+         "http://invidious.perennialte.ch/",
+    "http://yewtu.be/",
+    "https://iv.datura.network/",
+    "https://invidious.private.coffee/",
+    "https://invidious.protokolla.fi/",
+    "https://yt.cdaut.de/",
+    "https://invidious.fdn.fr/",
+    "https://inv.tux.pizza/",
+    "https://invidious.privacyredirect.com/",
+    "https://invidious.drgns.space/",
+    "https://vid.puffyan.us/",
+    "https://invidious.jing.rocks/",
+    "https://youtube.076.ne.jp/",
+    "https://inv.riverside.rocks/",
+    "https://invidio.xamh.de/",
+    "https://y.com.sb/",
+    "https://invidious.sethforprivacy.com/",
+    "https://invidious.tiekoetter.com/",
+    "https://inv.bp.projectsegfau.lt/",
+    "https://inv.vern.cc/",
+    "https://invidious.nerdvpn.de/",
+    "https://inv.privacy.com.de/",
+    "https://invidious.rhyshl.live/",
+    "https://invidious.slipfox.xyz/",
+    "https://invidious.weblibre.org/",
+    "https://invidious.namazso.eu/",
+    "https://invidious.jing.rocks",
+    "https://inv.nadeko.net/"
+    ];
 
     document.getElementById('convertButton').addEventListener('click', async () => {
         const url = document.getElementById('youtubeUrl').value.trim();
         const videoContainer = document.getElementById('videoContainer');
-        const loading = document.getElementById('loading');
-        const progressBar = document.getElementById('progressBar');
+        const loading = document.getElementById('progressBar');
         const loadingMessage = document.getElementById('loadingMessage');
-        const estimatedTime = document.getElementById('estimatedTime');
+        const mode = document.getElementById('modeSwitch').value;
 
         if (!url) {
-            await showMessage('<p class="text-danger">URLを入力してください。</p>', videoContainer);
+            await showMessage('<p class="text-danger">URL を見てください。</p>', videoContainer);
             return;
         }
 
         loading.style.display = 'block';
-        videoContainer.innerHTML = '';
-        progressBar.style.width = '0%';
-        progressBar.innerText = '0%';
-
+        loading.style.width = '0%';
         const videoId = extractVideoId(url);
         if (!videoId) {
-            await showMessage('<p class="text-danger">動画IDを取得できませんでした。URLを確認してください。</p>', videoContainer);
-            loading.style.display = 'none';
+            await showMessage('<p class="text-danger">無効なURLです。</p>', videoContainer);
             return;
         }
 
         let progress = 0;
         const interval = setInterval(() => {
-            progress += 10; // Shafts progress by 10% every second for demonstration
-            progressBar.style.width = `${Math.min(progress, 100)}%`;
-            progressBar.innerText = `${Math.min(progress, 100)}%`;
+            progress += 6.67; // 15分で100%になるように調整
+            loading.style.width = `${Math.min(progress, 100)}%`;
+            loading.innerText = `${Math.min(progress, 100)}%`;
             loadingMessage.textContent = '動画を取得中...';
-            estimatedTime.textContent = `残り時間: 約${(10 - (progress / 10)).toFixed(0)}秒`; // 予想時間を設定
+            estimatedTime.textContent = `残り時間: 約${(15 - (progress / 6.67)).toFixed(2)}分`;
+
             if (progress >= 100) clearInterval(interval);
-        }, 1000);
+        }, 9000); // 延長時間設定
 
         try {
-            await fetchFromPiped(videoId, videoContainer);
+            if (mode === 'on') {
+                await Promise.all([
+                    fetchFromMultiplePiped(videoId, videoContainer),
+                    fetchFromMultipleInvidious(videoId, videoContainer)
+                ]);
+            } else {
+                await fetchFromSinglePiped(videoId, videoContainer);
+                await fetchFromSingleInvidious(videoId, videoContainer);
+            }
         } catch (error) {
-            console.error('Pipedからの取得エラー:', error);
-            await fetchFromInvidious(videoId, videoContainer);
+            console.error('取得エラー:', error);
+            await showMessage('<p class="text-danger">動画取得中にエラーが発生しました。</p>', videoContainer);
         } finally {
             clearInterval(interval);
             loading.style.display = 'none';
@@ -145,11 +201,29 @@
         }
     });
 
-    async function fetchFromPiped(videoId, videoContainer) {
-        const apiUrl = `${pipedApi}/api/v1/videos/${videoId}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Pipedからの動画取得が失敗しました。');
+    async function fetchFromSinglePiped(videoId, videoContainer) {
+        const apiUrl = `${pipedApis[0]}/api/v1/videos/${videoId}`;
+        await fetchVideo(apiUrl, videoContainer);
+    }
 
+    async function fetchFromSingleInvidious(videoId, videoContainer) {
+        const apiUrl = `${invidiousApis[0]}/api/v1/videos/${videoId}`;
+        await fetchVideo(apiUrl, videoContainer);
+    }
+
+    async function fetchFromMultiplePiped(videoId, videoContainer) {
+        const promises = pipedApis.map(apiUrl => fetchVideo(`${apiUrl}/api/v1/videos/${videoId}`, videoContainer));
+        await Promise.allSettled(promises); // 全てのAPIを試し、成功したものを表示
+    }
+
+    async function fetchFromMultipleInvidious(videoId, videoContainer) {
+        const promises = invidiousApis.map(apiUrl => fetchVideo(`${apiUrl}/api/v1/videos/${videoId}`, videoContainer));
+        await Promise.allSettled(promises); // 全てのAPIを試し、成功したものを表示
+    }
+
+    async function fetchVideo(apiUrl, videoContainer) {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('動画取得が失敗しました。');
         const data = await response.json();
         if (data.videoStreams && data.videoStreams.length > 0) {
             const videoStream = data.videoStreams[0];
@@ -158,50 +232,6 @@
             await showMessage('<p class="text-warning">動画が見つかりませんでした。</p>', videoContainer);
         }
     }
-
-    async function fetchFromInvidious(videoId, videoContainer) {
-        const apiUrl = `${invidiousApi}/api/v1/videos/${videoId}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Invidiousからの動画取得が失敗しました。');
-
-        const videoData = await response.json();
-        if (videoData && videoData.embed) {
-            videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
-        } else {
-            await showMessage('<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>', videoContainer);
-        }
-    }
-
-    document.getElementById('searchButton').addEventListener('click', async () => {
-        const query = document.getElementById('searchbox').value.trim();
-        const searchResults = document.getElementById('searchResults');
-        searchResults.innerHTML = '';
-
-        if (!query) {
-            await showMessage('<p class="text-danger">検索クエリを入力してください。</p>', searchResults);
-            return;
-        }
-
-        const apiUrl = `${pipedApi}/search?query=${encodeURIComponent(query)}`;
-        const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-            await showMessage('<p class="text-danger">動画の検索中にエラーが発生しました。</p>', searchResults);
-            return;
-        }
-
-        const results = await response.json();
-        results.forEach(video => {
-            const resultDiv = document.createElement('div');
-            resultDiv.classList.add('search-result');
-            resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>`;
-            searchResults.appendChild(resultDiv);
-        });
-
-        if (results.length === 0) {
-            await showMessage('<p class="text-warning">動画が見つかりませんでした。</p>', searchResults);
-        }
-    });
 
     function extractVideoId(url) {
         const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -215,7 +245,7 @@
 
     $('#searchbox').autocomplete({
         source: async function (request, response) {
-            const url = `${pipedApi}/search?query=${request.term}`;
+            const url = `${pipedApis[0]}/search?query=${request.term}`;
             try {
                 const res = await fetch(url);
                 const data = await res.json();
@@ -226,7 +256,7 @@
         },
         delay: 300
     });
+
 </script>
 </body>
 </html>
-
