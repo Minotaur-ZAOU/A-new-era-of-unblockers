@@ -14,24 +14,20 @@
             color: #ffffff;
             padding: 20px;
         }
-
         .header {
             background-color: #6c757d;
             padding: 20px;
             border-radius: 5px;
         }
-
         h1 {
             margin-bottom: 0;
             font-family: 'Arial', sans-serif;
             text-transform: uppercase;
         }
-
         h2 {
             font-weight: normal;
             font-size: 1.2rem;
         }
-
         #videoContainer {
             margin-top: 20px;
             border: 1px solid #6c757d;
@@ -39,36 +35,29 @@
             padding: 10px;
             background-color: #495057;
         }
-
         #loading {
-            display: none; /* 初期は非表示 */
+            display: none;
         }
-
         .progress {
             height: 20px;
             margin-top: 10px;
         }
-
         .btn-primary {
             background-color: #007bff;
             border: none;
         }
-
         .btn-primary:hover {
             background-color: #0056b3;
         }
-
         .search-results {
             margin-top: 20px;
         }
-
         .search-result {
             margin-bottom: 10px;
             padding: 10px;
             background-color: #495057;
             border-radius: 5px;
         }
-
         .search-result a {
             color: #ffffff;
         }
@@ -105,92 +94,8 @@
 </div>
 
 <script>
-    const invidiousApis = [
-        "http://invidious.materialio.us/",
-        "http://invidious.perennialte.ch/",
-        "http://yewtu.be/",
-        "https://iv.datura.network/",
-    "https://invidious.private.coffee/",
-    "https://invidious.protokolla.fi/",
-    "https://yt.cdaut.de/",
-    "https://invidious.fdn.fr/",
-    "https://inv.tux.pizza/",
-    "https://invidious.privacyredirect.com/",
-    "https://invidious.drgns.space/",
-    "https://vid.puffyan.us/",
-    "https://invidious.jing.rocks/",
-    "https://youtube.076.ne.jp/",
-    "https://inv.riverside.rocks/",
-    "https://invidio.xamh.de/",
-    "https://y.com.sb/",
-    "https://invidious.sethforprivacy.com/",
-    "https://invidious.tiekoetter.com/",
-    "https://inv.bp.projectsegfau.lt/",
-    "https://inv.vern.cc/",
-    "https://invidious.nerdvpn.de/",
-    "https://inv.privacy.com.de/",
-    "https://invidious.rhyshl.live/",
-    "https://invidious.slipfox.xyz/",
-    "https://invidious.weblibre.org/",
-    "https://invidious.namazso.eu/",
-    "https://invidious.jing.rocks",
-    "https://inv.nadeko.net/",
-    ];
-
-    const pipedApis = [
-        "https://pipedapi.kavin.rocks",
-        "https://pipedapi.tokhmi.xyz",
-         "https://pipedapi.moomoo.me",
-    "https://pipedapi.syncpundit.io",
-    "https://api-piped.mha.fi",
-    "https://piped-api.garudalinux.org",
-    "https://pipedapi.rivo.lol",
-    "https://pipedapi.leptons.xyz",
-    "https://piped-api.lunar.icu",
-    "https://ytapi.dc09.ru",
-    "https://pipedapi.colinslegacy.com",
-    "https://yapi.vyper.me",
-    "https://api.looleh.xyz",
-    "https://piped-api.cfe.re",
-    "https://pipedapi.r4fo.com",
-    "https://pipedapi.nosebs.ru",
-    "https://pipedapi-libre.kavin.rocks",
-    "https://pa.mint.lgbt",
-    "https://pa.il.ax",
-    "https://piped-api.privacy.com.de",
-    "https://api.piped.projectsegfau.lt",
-    "https://pipedapi.in.projectsegfau.lt",
-    "https://pipedapi.us.projectsegfau.lt",
-    "https://watchapi.whatever.social",
-    "https://api.piped.privacydev.net",
-    "https://pipedapi.palveluntarjoaja.eu",
-    "https://pipedapi.smnz.de",
-    "https://pipedapi.adminforge.de",
-    "https://pipedapi.qdi.fi",
-    "https://piped-api.hostux.net",
-    "https://pdapi.vern.cc",
-    "https://pipedapi.pfcd.me",
-    "https://pipedapi.frontendfriendly.xyz",
-    "https://api.piped.yt",
-    "https://pipedapi.astartes.nl",
-    "https://pipedapi.osphost.fi",
-    "https://pipedapi.simpleprivacy.fr",
-    "https://pipedapi.drgns.space",
-    "https://pipedapi.ggtyler.dev",
-    "https://api.watch.pluto.lat",
-    "https://piped-backend.seitan-ayoub.lol",
-    "https://pipedapi.owo.si",
-    "https://api.piped.minionflo.net",
-    "https://pipedapi.nezumi.party",
-    "https://pipedapi.ducks.party",
-    "https://pipedapi.ngn.tf",
-    "https://pipedapi.coldforge.xyz",
-    "https://piped-api.codespace.cz",
-    "https://pipedapi.reallyaweso.me",
-    "https://pipedapi.phoenixthrush.com",
-    "https://api.piped.private.coffee",
-        "https://schaunapi.ehwurscht.at"
-    ];
+    const pipedApi = "https://pipedapi.kavin.rocks";
+    const invidiousApi = "https://yewtu.be"; // 例としてyewtu.beを使用
 
     document.getElementById('convertButton').addEventListener('click', async () => {
         const url = document.getElementById('youtubeUrl').value.trim();
@@ -204,142 +109,92 @@
             return;
         }
 
-        loading.style.display = 'block'; // loadingメッセージを表示
-        videoContainer.innerHTML = ''; // 前の内容をクリア
-
-        progressBar.style.width = '0%'; // プログレスバーをリセット
+        loading.style.display = 'block';
+        videoContainer.innerHTML = '';
+        progressBar.style.width = '0%';
         progressBar.innerText = '0%';
 
         const videoId = extractVideoId(url);
-        const timeoutDuration = 10000; // 10秒のタイムアウト
+
+        if (!videoId) {
+            await showMessage('<p class="text-danger">動画IDを取得できませんでした。URLを確認してください。</p>', videoContainer);
+            loading.style.display = 'none';
+            return;
+        }
 
         try {
-            await tryPiped(videoId, videoContainer, progressBar, timeoutDuration);
+            await fetchFromPiped(videoId, videoContainer);
         } catch (error) {
-            console.error('Error fetching video from Piped:', error);
-            await fetchFromInvidious(url);
+            console.error('Pipedからの取得エラー:', error);
+            await fetchFromInvidious(videoId, videoContainer);
         } finally {
-            loading.style.display = 'none'; // loadingメッセージを非表示
+            loading.style.display = 'none';
         }
     });
 
-    async function tryPiped(videoId, videoContainer, progressBar, timeoutDuration) {
-        for (const api of pipedApis) {
-            const apiUrl = `${api}/stream/${videoId}`;
-            try {
-                const response = await fetchWithTimeout(apiUrl, timeoutDuration, progressBar);
-                if (!response.ok) throw new Error('Pipedエラー');
+    async function fetchFromPiped(videoId, videoContainer) {
+        const apiUrl = `${pipedApi}/api/v1/videos/${videoId}`;
+        const response = await fetch(apiUrl);
 
-                const data = await response.json();
-                if (data.videoStreams && data.videoStreams.length > 0) {
-                    const videoStream = data.videoStreams[0]; // 最初のストリームを取得
-                    videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoStream.url}" frameborder="0" allowfullscreen></iframe>`;
-                    return; // 成功した場合は終了
-                }
-            } catch (error) {
-                console.error(`Error with Piped API ${api}:`, error);
-                await showMessage(`<p class="text-warning">Piped API ${api}が失敗しました。次のAPIを試みます...</p>`, videoContainer);
-            }
+        if (!response.ok) {
+            throw new Error('Pipedからの動画取得が失敗しました。');
         }
-        throw new Error('すべてのPiped APIが失敗しました。');
+
+        const data = await response.json();
+        if (data.videoStreams && data.videoStreams.length > 0) {
+            const videoStream = data.videoStreams[0];
+            videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoStream.url}" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+            await showMessage('<p class="text-warning">動画が見つかりませんでした。</p>', videoContainer);
+        }
+    }
+
+    async function fetchFromInvidious(videoId, videoContainer) {
+        const apiUrl = `${invidiousApi}/api/v1/videos/${videoId}`;
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error('Invidiousからの動画取得が失敗しました。');
+        }
+
+        const videoData = await response.json();
+        if (videoData && videoData.embed) {
+            videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+            await showMessage('<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>', videoContainer);
+        }
     }
 
     document.getElementById('searchButton').addEventListener('click', async () => {
         const query = document.getElementById('searchbox').value.trim();
         const searchResults = document.getElementById('searchResults');
-        searchResults.innerHTML = ''; // 前の検索結果をクリア
+        searchResults.innerHTML = '';
 
         if (!query) {
             await showMessage('<p class="text-danger">検索クエリを入力してください。</p>', searchResults);
             return;
         }
 
-        const apiUrl = `https://pipedapi.kavin.rocks/search?query=${encodeURIComponent(query)}`;
+        const apiUrl = `${pipedApi}/search?query=${encodeURIComponent(query)}`;
+        const response = await fetch(apiUrl);
 
-        try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('検索中にエラーが発生しました。');
+        if (!response.ok) {
+            await showMessage('<p class="text-danger">動画の検索中にエラーが発生しました。</p>', searchResults);
+            return;
+        }
 
-            const results = await response.json();
-            results.forEach(video => {
-                const resultDiv = document.createElement('div');
-                resultDiv.classList.add('search-result');
-                resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>`;
-                searchResults.appendChild(resultDiv);
-            });
+        const results = await response.json();
+        results.forEach(video => {
+            const resultDiv = document.createElement('div');
+            resultDiv.classList.add('search-result');
+            resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>`;
+            searchResults.appendChild(resultDiv);
+        });
 
-            if (results.length === 0) {
-                await showMessage('<p class="text-warning">動画が見つかりませんでした。</p>', searchResults);
-            }
-        } catch (error) {
-            console.error('Error searching videos:', error);
-            await showMessage('<p class="text-danger">動画の検索中にエラーが発生しました。別のAPIを試しています...</p>', searchResults);
-            await fallbackToSearchWithAlternativeAPIs(query, searchResults); // 代替APIで検索
+        if (results.length === 0) {
+            await showMessage('<p class="text-warning">動画が見つかりませんでした。</p>', searchResults);
         }
     });
-
-    async function fetchFromInvidious(url) {
-        const videoContainer = document.getElementById('videoContainer');
-        const videoId = extractVideoId(url);
-        const randomApi = invidiousApis[Math.floor(Math.random() * invidiousApis.length)];
-        const apiUrl = `${randomApi}api/v1/videos/${videoId}`;
-
-        try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error('Invidiousエラー');
-
-            const videoData = await response.json();
-            if (videoData && videoData.embed) {
-                videoContainer.innerHTML = `<iframe width="560" height="315" src="${videoData.embed}" frameborder="0" allowfullscreen></iframe>`;
-            } else {
-                await showMessage('<p class="text-warning">動画が見つかりませんでした。URLが正しいか確認してください。</p>', videoContainer);
-                await fallbackToYouTube(url);
-            }
-        } catch (error) {
-            console.error('Error fetching video from Invidious:', error);
-            await showMessage('<p class="text-danger">エラーが発生しました。この動画は再生できないか、存在しない可能性があります。もう一度お試しください。</p>', videoContainer);
-            await fallbackToYouTube(url);
-        }
-    }
-
-    async function fallbackToYouTube(url) {
-        const videoId = extractVideoId(url);
-        if (videoId) {
-            const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}`;
-            const videoContainer = document.getElementById('videoContainer');
-            videoContainer.innerHTML = `<iframe width="560" height="315" src="${youtubeEmbedUrl}" frameborder="0" allowfullscreen></iframe>`;
-        } else {
-            const videoContainer = document.getElementById('videoContainer');
-            await showMessage('<p class="text-danger">YouTube動画IDを取得できませんでした。URLが正しいか確認してください。</p>', videoContainer);
-        }
-    }
-
-    async function fallbackToSearchWithAlternativeAPIs(query, searchResults) {
-        for (const api of invidiousApis) {
-            try {
-                const apiUrl = `${api}api/v1/search?query=${encodeURIComponent(query)}`;
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Alternative API error');
-
-                const results = await response.json();
-                results.forEach(video => {
-                    const resultDiv = document.createElement('div');
-                    resultDiv.classList.add('search-result');
-                    resultDiv.innerHTML = `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank">${video.title}</a>`;
-                    searchResults.appendChild(resultDiv);
-                });
-
-                if (results.length > 0) {
-                    return; // 成功した場合は終了
-                }
-            } catch (error) {
-                console.error('Error searching videos with alternative API:', error);
-                await showMessage('<p class="text-danger">代替APIでの検索に失敗しました。</p>', searchResults);
-            }
-        }
-
-        await showMessage('<p class="text-warning">どのAPIでも動画が見つかりませんでした。</p>', searchResults);
-    }
 
     function extractVideoId(url) {
         const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -351,40 +206,17 @@
         return new Promise(resolve => setTimeout(resolve, 3000));
     }
 
-    async function fetchWithTimeout(url, duration, progressBar) {
-        return Promise.race([
-            fetch(url).then(res => {
-                return new Promise((resolve, reject) => {
-                    let progress = 0;
-                    const interval = setInterval(() => {
-                        progress += 10;
-                        if (progress > 100) {
-                            clearInterval(interval);
-                            return resolve(res);
-                        }
-                        progressBar.style.width = `${progress}%`;
-                        progressBar.innerText = `${progress}%`;
-                    }, 1000);
-                });
-            }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('タイムアウト')), duration))
-        ]);
-    }
-
     // オートコンプリート機能の追加
     $('#searchbox').autocomplete({
-        source: function (request, response) {
-            const url = `/suggest?keyword=${request.term}`;
-            $.ajax({
-                url: url,
-                method: "GET",
-                success: function(data) {
-                    response(data);
-                },
-                error: function() {
-                    response([]);
-                }
-            });
+        source: async function (request, response) {
+            const url = `${pipedApi}/search?query=${request.term}`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                response(data); 
+            } catch {
+                response([]);
+            }
         },
         delay: 300
     });
